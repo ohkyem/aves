@@ -33,8 +33,14 @@ jobs:
       - name: Generate localization
         run: flutter gen-l10n
 
-      - name: Build Debug APK
-        run: flutter build apk --debug
+      - name: Build Debug APK (Play)
+        run: |
+         ./flutterw pub get
+         ./flutterw build apk --debug -t lib/main_play.dart --flavor play
+
+      - name: Build Debug APK (Izzy)
+        run: |
+         ./flutterw build apk --debug -t lib/main_izzy.dart --flavor izzy
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
