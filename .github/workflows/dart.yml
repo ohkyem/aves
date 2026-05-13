@@ -3,37 +3,33 @@ name: Build Debug APK
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  build-debug:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.35.1
-          channel: stable
+          channel: master
           cache: true
 
-      - name: Flutter Doctor
-        run: flutter doctor -v
+      - name: Flutter Version
+        run: flutter --version
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Generate localizations
+      - name: Generate localization
         run: flutter gen-l10n
 
       - name: Build Debug APK
