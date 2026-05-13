@@ -2,16 +2,13 @@ name: Build Debug APKs
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - v*
 
 permissions:
   contents: write
 
 jobs:
-  build_debug_apks:
-    name: Build Debug APKs
+  build-debug-apk:
+    name: Build Debug APK
     runs-on: ubuntu-latest
 
     steps:
@@ -27,8 +24,11 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          flutter-version: 3.32.0
           cache: true
+
+      - name: Flutter Doctor
+        run: flutter doctor
 
       - name: Install dependencies
         run: flutter pub get
@@ -36,35 +36,17 @@ jobs:
       - name: Generate localizations
         run: flutter gen-l10n
 
-      - name: Build APKs
-        run: |
-          mkdir -p outputs
+      - name: Build Debug APK
+        run: flutter build apk --debug
 
-          # PLAY
-          scripts/apply_flavor_play.sh
-          flutter build apk \
-            -t lib/main_play.dart \
-            --flavor play \
-            --debug
-          cp build/app/outputs/flutter-apk/*.apk outputs/
-
-          # IZZY
-          scripts/apply_flavor_izzy.sh
-          flutter build apk \
-            -t lib/main_izzy.dart \
-            --flavor izzy \
-            --debug
-          cp build/app/outputs/flutter-apk/*.apk outputs/
-
-          # LIBRE
-          scripts/apply_flavor_libre.sh
-          flutter build apk \
-            -t lib/main_libre.dart \
-            --flavor libre \
-            --debug
-          cp build/app/outputs/flutter-apk/*.apk outputs/
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: build/app/outputs/flutter-apk/*.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: outputs/*.apk 
+          files: build/app/outputs/flutter-apk/*.apk 
